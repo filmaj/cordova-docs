@@ -314,7 +314,7 @@ cw_project: CW_COMMAND = list project
 cw_translations: CW_COMMAND = list translations
 cw_sources: CW_COMMAND = list sources
 cw_upload: CW_COMMAND = upload sources --auto-update
-cw_download: CW_COMMAND = download en
+cw_download: CW_COMMAND = download
 cw_project cw_translations cw_sources cw_upload cw_download: crowdin
 
 crowdin: $(CROWDIN_JAIL) $(CROWDIN_COPY)

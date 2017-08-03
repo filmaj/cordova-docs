@@ -25,4 +25,10 @@ base_path: ../crowdin-jail
 # patterns for file translation
 files:
     -   source: '/**/*.md'
-        translation: '/cordova-docs/docs/%locale%/dev/**/%original_file_name%'
+        translation: '/cordova-docs/docs/%two_letters_code%/dev/**/%original_file_name%'
+        "languages_mapping" : {
+          "two_letters_code" : {
+            "zh-CN" : "zh-cn",
+            "zh-TW" : "zh-tw"
+          }
+        }

@@ -14,11 +14,13 @@ SHELL  = cmd
 JEKYLL = bundle.bat exec jekyll
 CAT    = type
 LS     = ls
+MKDIRP = "" # TODO: this needs filling out
 else
 SHELL  = sh
 JEKYLL = bundle exec jekyll
 CAT    = cat
 LS     = ls
+MKDIRP = mkdir -p
 endif
 
 # macros
@@ -295,35 +297,49 @@ $(CSS_DEST_DIR)/%.css: $(CSS_SRC_DIR)/%.css
 	$(call printfile,$<) >> $@
 
 # crowdin
-CROWDIN_SRC      = www/docs/en/dev
-CROWDIN_JAIL     = crowdin-jail
-CROWDIN_COPY_DIR = $(CROWDIN_JAIL)/cordova-docs/docs/en
-CROWDIN_COPY     = $(CROWDIN_COPY_DIR)/dev
+CROWDIN_DOCS_SRC    = www/docs/en/dev
+CORDOVA_CLI_DIR     = ../cordova-cli
+CROWDIN_CLI_SRC     = $(CORDOVA_CLI_DIR)/doc
+CROWDIN_CLI_FILES   = $(CROWDIN_CLI_SRC)/readme.md $(CROWDIN_CLI_SRC)/bash.md
+CROWDIN_PLUGINS_SRC = ../cordova-plugin-*
+CROWDIN_JAIL        = crowdin-jail
+CROWDIN_COPY_DOCS_DIR    = $(CROWDIN_JAIL)/cordova-docs/docs/en
+CROWDIN_COPY_DOCS        = $(CROWDIN_COPY_DOCS_DIR)/dev
+CROWDIN_COPY_CLI_DIR = $(CROWDIN_JAIL)/cordova-cli/doc
 
-$(CROWDIN_JAIL) $(CROWDIN_COPY_DIR):
+$(CROWDIN_JAIL) $(CROWDIN_COPY_DOCS_DIR) $(CROWDIN_COPY_CLI_DIR):
 ifdef WINDOWS
 	-$(MKDIRP) $(subst /,\,$@)
 else
 	$(MKDIRP) $@
 endif
 
-$(CROWDIN_COPY): $(CROWDIN_SRC) $(CROWDIN_COPY_DIR) $(FETCHED_FILES)
-	cp -R $(CROWDIN_SRC) $(CROWDIN_COPY_DIR)
+cw_copy: $(CROWDIN_DOCS_SRC) $(CROWDIN_CLI_SRC) $(CROWDIN_COPY_DOCS_DIR) $(CROWDIN_COPY_CLI_DIR) $(FETCHED_FILES)
+	cp -R $(CROWDIN_DOCS_SRC) $(CROWDIN_COPY_DOCS_DIR)
+	pushd $(CORDOVA_CLI_DIR) && git checkout master && git pull origin master && popd
+	cp $(CROWDIN_CLI_FILES) $(CROWDIN_COPY_CLI_DIR)
+	for plugin in $(CROWDIN_PLUGINS_SRC) ; do \
+		pushd $$plugin; \
+		git checkout master; \
+		git pull origin master; \
+		popd; \
+		plug_dir=$(CROWDIN_JAIL)/$$(basename $$plugin); \
+		$(MKDIRP) $$plug_dir; \
+		cp $$plugin/README.md $$plug_dir; \
+	done;
 
-cw_project: CW_COMMAND = list project
-cw_translations: CW_COMMAND = list translations
-cw_sources: CW_COMMAND = list sources
+cw_list: CW_COMMAND = list
 cw_upload: CW_COMMAND = upload sources --auto-update
 cw_download: CW_COMMAND = download
-cw_project cw_translations cw_sources cw_upload cw_download: crowdin
+cw_list cw_upload cw_download: crowdin
 
-crowdin: $(CROWDIN_JAIL) $(CROWDIN_COPY)
+crowdin: $(CROWDIN_JAIL) cw_copy
 	(cd $(CROWDIN_JAIL) && $(CROWDIN) --identity=$(CROWDIN_IDENTITY_FILE) --config=../$(CROWDIN_CONFIG) $(CW_COMMAND))
 
-on_disk.txt: $(CROWDIN_COPY)
+on_disk.txt: cw_copy
 	$(MAKE) cw_sources | grep "^/cordova-docs" | sort > $@
 
-on_crowdin.txt: $(CROWDIN_COPY)
+on_crowdin.txt: cw_copy
 	$(MAKE) cw_project | grep "^/cordova-docs" | sort > $@
 
 cw_diff: on_disk.txt on_crowdin.txt

@@ -77,7 +77,7 @@ PLUGINS_DEST_DIR = $(STATIC_DIR)/js
 
 # executables
 NODE       = node
-CROWDIN    = crowdin-cli
+CROWDIN    = crowdin
 GULP       = $(NODE_BIN_DIR)/gulp
 LESSC      = $(NODE_BIN_DIR)/lessc
 SASSC      = $(NODE_BIN_DIR)/node-sass

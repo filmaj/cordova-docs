@@ -1,5 +1,6 @@
 build-*
 *.pyc
+*.swp
 
 conf/_defaults.yml
 conf/_version.yml

@@ -20,7 +20,7 @@ api_key:
 preserve_hierarchy: true
 
 # prefix for source paths
-base_path: .
+base_path: ../crowdin-jail
 
 # patterns for file translation
 files:

@@ -315,9 +315,11 @@ else
 endif
 
 cw_copy: $(CROWDIN_DOCS_SRC) $(CROWDIN_CLI_SRC) $(CROWDIN_COPY_DOCS_DIR) $(CROWDIN_COPY_CLI_DIR) $(FETCHED_FILES)
+	# TODO: ignore deprecated platform guides (wp8, win8, osx, ubuntu, blackberry, bb10)
 	cp -R $(CROWDIN_DOCS_SRC) $(CROWDIN_COPY_DOCS_DIR)
 	pushd $(CORDOVA_CLI_DIR) && git checkout master && git pull origin master && popd
 	cp $(CROWDIN_CLI_FILES) $(CROWDIN_COPY_CLI_DIR)
+	# TODO: ignore file-transfer, splashscreen, media, statusbar, contacts, whitelist, device-motion, console, device orientation, compat, legacy whitelist
 	for plugin in $(CROWDIN_PLUGINS_SRC) ; do \
 		pushd $$plugin; \
 		git checkout master; \
